@@ -20,7 +20,7 @@ format      Format sources
 ### Dev
 Development base on
 - GO: 1.18
-- GIN: v1.9.1
+- GIN: v1.7.7
 ### Runtime
 **conf/app.ini** keeps all parameters, list major keys as below:
 1. HTTP Port: 8000
