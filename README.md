@@ -38,6 +38,18 @@ the major implementation is in `/internal`
 | /internal/models     | data type definition                           |
 |                      |                                                |
 
+## Test
+2 Major logic middleware and service have been covered by test cases
+
+<img width="480" alt="image" src="https://github.com/shenmengkai/gogolook2024/assets/15992122/ccf261f8-393d-4285-a557-48f09fe776ed">
+
+`make test` use *gotestsum* for better output and do automatically installation, or you prefer go test just by
+```
+go test ./internal/...
+```
+
+
+
 ## Lack of features or issuses could be improve
 1. Authenication
 2. Race condition on data access
