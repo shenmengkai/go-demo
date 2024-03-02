@@ -28,15 +28,17 @@ Development base on
   Data save on Redis. the Docker Compose already contains a Redis service. If run at local, use `make redis` first, or start your own redis at port 6379
 
 ## Implementation
+<img width="517" alt="image" src="https://github.com/shenmengkai/gogolook2024/assets/15992122/fdde246c-34f5-4289-8edc-71e56be030c5">
+
+
 the major implementation is in `/internal`
-| module               | description                                    |
-| -------------------- | ---------------------------------------------- |
-| /internal/router     | routing table to relative handler              |
-| /internal/middleware | Handler of gin router, process request content |
-| /internal/service    | Busniess logic, define the behavior            |
-| /internal/repo       | Data source interface                          |
-| /internal/models     | data type definition                           |
-|                      |                                                |
+| module                                        | description                                    |
+| :-------------------------------------------- | :--------------------------------------------- |
+| [/internal/router](./internal/router )        | routing table to relative handler              |
+| [/internal/middleware](./internal/middleware) | Handler of gin router, process request content |
+| [/internal/service](./internal/service)       | Busniess logic, define the behavior            |
+| [/internal/repo](./internal/repo)             | Data source interface                          |
+| [/internal/models](./internal/models)         | data type definition                           |
 
 ## Test
 2 Major logic middleware and service have been covered by test cases
@@ -51,6 +53,7 @@ go test ./internal/...
 
 
 ## Lack of features or issuses could be improve
-1. Authenication
-2. Race condition on data access
+1. Authenication or API_KEY
+2. Database
+  Currently use redis for quick implementation, and lack of consistansy, chance to hit race condition, change to database to achieve atomic access 
 3. swagger/api doc auto generation
