@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -76,6 +77,7 @@ func (m *TaskMiddlewareImpl) CreateTask(c *gin.Context) {
 }
 
 type UpdateTaskForm struct {
+	ID     *int    `form:"id"`
 	Text   *string `form:"text"`
 	Status *int    `form:"status"`
 }
@@ -88,29 +90,29 @@ func (m *TaskMiddlewareImpl) UpdateTask(c *gin.Context) {
 	)
 
 	if len(idStr) == 0 {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, "missing id")
 		return
 	}
 
 	taskId, err := com.StrTo(idStr).Int()
 	if err != nil {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, fmt.Sprintf("incorrect id(\"%s\")", idStr))
 		return
 	}
 
 	if taskId < 0 {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, fmt.Sprintf("incorrect id(%d)", taskId))
 		return
 	}
 
 	task, err := m.TaskService.Get(taskId)
 	if err != nil {
-		appG.Response(http.StatusNotFound, e.ERROR_EXIST_TASK_FAIL, nil)
+		appG.Response(http.StatusNotFound, e.ERROR_EXIST_TASK_FAIL, "task not exists")
 		return
 	}
 
 	if err := c.ShouldBindJSON(&form); err != nil {
-		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, "incorrect format")
 		return
 	}
 
