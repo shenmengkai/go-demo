@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -13,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"github.com/unknwon/com"
 
 	"github.com/shenmengkai/gogolook2024/internal/models"
 )
@@ -58,6 +60,20 @@ func TestTaskMdw_CreateTask(t *testing.T) {
 		"TaskMiddleware.CreateTask() body is incorrect")
 }
 
+func TestTaskMdw_CreateTaskBadForm(t *testing.T) {
+	emptyText := ""
+	svcMock := new(TaskServiceImplMock)
+
+	ctx, resp := mockContext(t, http.MethodPost, "/task", fmt.Sprintf(`{ "text": "%s" }`, emptyText))
+	testMdw(svcMock).CreateTask(ctx)
+	svcMock.AssertNotCalled(t, "Create")
+
+	require.Equal(t,
+		http.StatusBadRequest,
+		resp.Code,
+		"TaskMiddleware.CreateTask() not OK")
+}
+
 func TestTaskMdw_UpdateTask(t *testing.T) {
 	text := "TEST_UPDATE_TASK"
 	oldTask := models.Task{
@@ -89,29 +105,64 @@ func TestTaskMdw_UpdateTask(t *testing.T) {
 		"TaskMiddleware.UpdateTask() body is incorrect")
 }
 
-// func TestTaskMdw_UpdateTaskBadForm(t *testing.T) {
-// 	text := "TEST_UPDATE_TASK"
-// 	id := 95
-// 	oldTask := models.Task{
-// 		ID:     id,
-// 		Text:   "OLD_TASK",
-// 		Status: 0,
-// 	}
-// 	svcMock := new(TaskServiceImplMock)
-// 	svcMock.On("Get", id).
-// 		Return(oldTask, nil)
+func TestTaskMdw_UpdateTaskBadForm(t *testing.T) {
+	cases := []struct {
+		name     string
+		id       int
+		text     string
+		status   string
+		expected int
+	}{
+		{"omit text", 1, "", "1", http.StatusOK},
+		{"omit status", 3, "TEST_UPDATE_TASK", "", http.StatusOK},
+		{"all missing", 3, "", "", http.StatusBadRequest},
+		{"status too small", 2, "TEST_UPDATE_TASK", "-1", http.StatusBadRequest},
+		{"status too big", 3, "TEST_UPDATE_TASK", "2", http.StatusBadRequest},
+		{"status format wrong", 3, "TEST_UPDATE_TASK", "yes", http.StatusBadRequest},
+	}
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			text := test.text
+			status := test.status
+			id := test.id
+			oldTask := models.Task{
+				ID:     id,
+				Text:   "OLD_TASK",
+				Status: 0,
+			}
+			svcMock := new(TaskServiceImplMock)
+			svcMock.On("Get", id).
+				Return(oldTask, nil)
+			if test.expected == http.StatusOK {
+				newTask := oldTask
+				if len(text) > 0 {
+					newTask.Text = text
+				}
+				if len(status) > 0 {
+					newTask.Status = com.StrTo(status).MustInt()
+				}
+				svcMock.On("Update", newTask).
+					Return(nil)
+			}
 
-// 	ctx, resp := mockContext(t, http.MethodPut,
-// 		fmt.Sprintf(`/task/%d`, id),
-// 		fmt.Sprintf(`{ "badtext": "%s" }`, text))
-// 	testMdw(svcMock).UpdateTask(ctx)
-// 	svcMock.AssertNotCalled(t, "Update")
+			ctx, resp := mockContext(t, http.MethodPut,
+				fmt.Sprintf(`/task/%d`, id),
+				mixedStringNumberToJson(map[string]string{
+					"text":   text,
+					"status": status,
+				}))
+			testMdw(svcMock).UpdateTask(ctx)
+			if test.expected != http.StatusOK {
+				svcMock.AssertNotCalled(t, "Update")
+			}
 
-// 	require.Equal(t,
-// 		http.StatusBadRequest,
-// 		resp.Code,
-// 		"TaskMiddleware.UpdateTask() not OK")
-// }
+			require.Equal(t,
+				test.expected,
+				resp.Code,
+				"TaskMiddleware.UpdateTask() not OK")
+		})
+	}
+}
 
 func TestTaskMdw_UpdateTaskWithoutId(t *testing.T) {
 	svcMock := new(TaskServiceImplMock)
@@ -261,4 +312,21 @@ func (m *TaskServiceImplMock) Update(task models.Task) error {
 func (m *TaskServiceImplMock) Delete(id int) error {
 	args := m.Called(id)
 	return args.Error(0)
+}
+
+func mixedStringNumberToJson(kv map[string]string) string {
+	converted := map[string]interface{}{}
+	for key, value := range kv {
+		if len(value) == 0 {
+			continue
+		}
+		valueInt, err := com.StrTo(value).Int()
+		if err == nil {
+			converted[key] = valueInt
+		} else {
+			converted[key] = value
+		}
+	}
+	jsonBytes, _ := json.Marshal(converted)
+	return string(jsonBytes)
 }

@@ -56,9 +56,13 @@ func (m *TaskMiddlewareImpl) CreateTask(c *gin.Context) {
 		err    error
 	)
 
-	httpCode, errCode := app.BindAndValid(c, &form)
-	if errCode != e.SUCCESS {
-		appG.Response(httpCode, errCode, nil)
+	if err := c.ShouldBindJSON(&form); err != nil {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
+	}
+
+	if len(form.Text) == 0 {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
 
@@ -105,16 +109,35 @@ func (m *TaskMiddlewareImpl) UpdateTask(c *gin.Context) {
 		return
 	}
 
-	if _, errCode := app.BindAndValid(c, &form); errCode != e.SUCCESS {
-		appG.Response(http.StatusBadRequest, errCode, nil)
+	if err := c.ShouldBindJSON(&form); err != nil {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
 		return
 	}
 
+	haveSet := false
 	if form.Text != nil {
-		task.Text = *form.Text
+		if len(*form.Text) == 0 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		} else {
+			task.Text = *form.Text
+			haveSet = true
+		}
 	}
+
 	if form.Status != nil {
-		task.Status = *form.Status
+		if *form.Status < 0 || *form.Status > 1 {
+			appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+			return
+		} else {
+			task.Status = *form.Status
+			haveSet = true
+		}
+	}
+
+	if !haveSet {
+		appG.Response(http.StatusBadRequest, e.INVALID_PARAMS, nil)
+		return
 	}
 
 	err = m.TaskService.Update(task)
