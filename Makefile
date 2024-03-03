@@ -1,5 +1,8 @@
 PROJECT		:=gogolook2024
 MAIN_DIR	:=./cmd/$(PROJECT)
+SOURCES		:=$(shell find . -type f -name '*.go')
+PORT 		:=$(shell grep 'HttpPort' conf/app.ini | cut -d '=' -f2 | tr -d ' ')
+BASE_URL	:=http://localhost:$(PORT)
 
 define HELP_TEXT
 release: Build docker container
@@ -7,13 +10,17 @@ build: Build local
 run: Run $(PROJECT) at local
 test: Run test cases
 start: Start docker compose
-redis: Start docker compose only Redis
+redis: Start docker compose only Redis, before you run applicaion at local
 clean: Remove object files and cached files
 format: Format sources
+create: curl test to create task by picking random word
+update: curl test to update task by example 'make update id=10 text=movie status=1'
+delete: curl test to delete task by example 'make delete id=10'
+list: curl test to list tasks
 endef
 export HELP_TEXT
 
-.PHONY: release build run help start redis clean format gotestsum
+.PHONY: all help release build run start redis clean format gotestsum FORCE create update list delete
 
 all: help
 
@@ -29,9 +36,11 @@ help:
 release: build
 	@docker build --progress=plain -t ${PROJECT} .
 
-build:
+$(PROJECT): $(SOURCES) FORCE
 	@go build -v $(MAIN_DIR)
-	@echo Build $(MAIN_DIR)
+	@echo "Build finished successfully."
+
+build: $(PROJECT)
 
 clean:
 	@rm -rf ${PROJECT}
@@ -61,17 +70,63 @@ gotestsum:
 	}
 
 list:
-	@clear
-	@curl -X GET http://localhost:8000/tasks
+	@TMPFILE=$$(mktemp); \
+	STATUS_CODE=$$(curl -s -o $$TMPFILE -w "%{http_code}" -X GET $(BASE_URL)/tasks); \
+	echo "$$STATUS_CODE GET $(BASE_URL)/tasks"; \
+	if [ $$STATUS_CODE -ge 200 ] && [ $$STATUS_CODE -lt 400 ]; then \
+		cat $$TMPFILE | python3 -m json.tool; \
+	else \
+		echo "Request failed with status code: $$STATUS_CODE"; \
+	fi; \
+	rm -f $$TMPFILE
 
-add:
-	@clear
-	@curl -X POST http://localhost:8000/task -H "Content-Type: application/json" -d '{"text": "'$(shell sort -R /usr/share/dict/words | head -n 1)'"}'
+create:
+	@TMPFILE=$$(mktemp); \
+	STATUS_CODE=$$(curl -s -o $$TMPFILE -w "%{http_code}" -X POST -H "Content-Type: application/json" -d '{"text": "'$(shell sort -R /usr/share/dict/words | head -n 1)'"}' $(BASE_URL)/task); \
+	echo "$$STATUS_CODE POST $(BASE_URL)/task"; \
+	if [ $$STATUS_CODE -ge 200 ] && [ $$STATUS_CODE -lt 400 ]; then \
+		cat $$TMPFILE | python3 -m json.tool; \
+	else \
+		echo "Request failed with status code: $$STATUS_CODE"; \
+	fi; \
+	rm -f $$TMPFILE
 
-edit:
-	@clear
-	@curl -X PUT http://localhost:8000/task/17 -H "Content-Type: application/json" -d '{"text": "rabbit",  "status":0}'
+update:
+	@if [ -z "$(id)" ]; then \
+		echo "Update which task?"; \
+		echo 'Use "make edit id=10 text=ski status=1"'; \
+		exit 1; \
+	fi; \
+	if [ -z "$(text)" -a -z "$(status)" ]; then \
+		echo "Update what field?"; \
+		echo 'Use "make edit id=10 text=ski status=1"'; \
+		exit 1; \
+	fi;
+	$(eval TMPFILE := $(shell mktemp))
+	@BODY="{\"id\": $(id)"; \
+	if [ -n "$(text)" ]; then BODY="$$BODY, \"text\": \"$(text)\""; fi; \
+	if [ -n "$(status)" ]; then BODY="$$BODY, \"status\": $(status)"; fi; \
+	BODY="$$BODY }"; \
+	STATUS_CODE=$$(curl -s -o $(TMPFILE) -w "%{http_code}" -X PUT -H "Content-Type: application/json" -d "$$BODY" $(BASE_URL)/task/$(id)); \
+	echo "$$STATUS_CODE PUT $(BASE_URL)/task/$(id)"; \
+	if [ $$STATUS_CODE -ge 200 ] && [ $$STATUS_CODE -lt 400 ]; then \
+		cat $(TMPFILE) |  python3 -m json.tool; \
+	else \
+		cat $(TMPFILE); \
+	fi; \
+	echo; \
+	rm -f $(TMPFILE)
 
-del:
-	@clear
-	@curl -X DELETE http://localhost:8000/task/17
+delete:
+	@if [ -z "$(id)" ]; then \
+		echo "Delete which task?"; \
+		echo 'Use "make delete id=10"'; \
+		exit 1; \
+	fi;
+	@TMPFILE=$$(mktemp); \
+	STATUS_CODE=$$(curl -s -o $$TMPFILE -w "%{http_code}" -X DELETE $(BASE_URL)/task/$$id); \
+	echo "$$STATUS_CODE DELETE $(BASE_URL)/task/$(id)"; \
+	if [ $$STATUS_CODE -ge 400 ] ; then \
+		cat $$TMPFILE; \
+	fi; \
+	rm -f $$TMPFILE

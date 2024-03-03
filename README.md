@@ -15,6 +15,10 @@ start       Start docker compose
 redis       Start docker compose only Redis, before you run applicaion at local
 clean       Remove object files and cached files
 format      Format sources
+create      curl test to create task by picking random word
+update      curl test to update task by example 'make update id=10 text=movie status=1'
+delete      curl test to delete task by example 'make delete id=10'
+list        curl test to list tasks
 ```
 ## Environment
 ### Dev
@@ -50,9 +54,7 @@ the major implementation is in `/internal`
 go test ./internal/...
 ```
 
-
-
-## Lack of features or issuses could be improve
+## Lack of features or issues could be improved
 1. Authenication or API_KEY
 2. Database
   Currently use redis for quick implementation, and lack of consistansy, chance to hit race condition, change to database to achieve atomic access 
