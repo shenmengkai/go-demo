@@ -6,14 +6,6 @@ import (
 	"github.com/shenmengkai/gogolook2024/internal/middleware"
 )
 
-func mdw() middleware.TaskMiddleware {
-	var handler middleware.TaskMiddleware = &middleware.TaskMiddlewareImpl{
-		TaskService: middleware.GetTaskService(),
-	}
-	return handler
-}
-
-// InitRouter initialize routing information
 func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
@@ -25,4 +17,11 @@ func InitRouter() *gin.Engine {
 	r.DELETE("/task/:id", mdw().DeleteTask)
 
 	return r
+}
+
+func mdw() middleware.TaskMiddleware {
+	var handler middleware.TaskMiddleware = &middleware.TaskMiddlewareImpl{
+		TaskService: middleware.GetTaskService(),
+	}
+	return handler
 }

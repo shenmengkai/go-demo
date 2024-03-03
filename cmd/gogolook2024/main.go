@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/shenmengkai/gogolook2024/pkg/gredis"
-	"github.com/shenmengkai/gogolook2024/pkg/logging"
 	"github.com/shenmengkai/gogolook2024/pkg/setting"
 
 	"github.com/shenmengkai/gogolook2024/internal/repo"
@@ -17,7 +16,6 @@ import (
 
 func init() {
 	setting.Setup()
-	logging.Setup()
 	gredis.Setup()
 	task_repo.Setup()
 }
