@@ -1,4 +1,5 @@
 gogolook2024
+.docker_build
 .idea/
 .DS_Store
 runtime

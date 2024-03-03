@@ -33,8 +33,11 @@ help:
 		printf "%-10s %s\n" "$$command" "$$description"; \
 	done
 
-release: build
+release: .docker_build
+
+.docker_build: $(SOURCES) ./Dockerfile
 	@docker build --progress=plain -t ${PROJECT} .
+	@touch $@
 
 $(PROJECT): $(SOURCES) FORCE
 	@go build -v $(MAIN_DIR)
