@@ -23,15 +23,20 @@ list        curl test to list tasks
 ```
 
 ## Environment
-### Dev
 Development base on
 - GO: 1.18
 - GIN: v1.7.7
-### Runtime
-**conf/app.ini** keeps all parameters, list major keys as below:
+
+### Redis
+Data will save on Redis. There are 3 ways to coordinate with app:
+1. Docker Compose contains a Redis service, just run `make start` to start app and Redis both.
+2. Use `make redis` to start Redis image only.
+3. Start your own Redis at port 6379
+
+## Development
+**conf/app.ini** keeps app parameters, list major keys as below:
 1. HTTP Port: 8000
 2. Redis Port: 6379
-  Data save on Redis. the Docker Compose already contains a Redis service. If run at local, use `make redis` first, or start your own redis at port 6379
 
 ## Implementation
 <img width="517" alt="image" src="https://github.com/shenmengkai/gogolook2024/assets/15992122/fdde246c-34f5-4289-8edc-71e56be030c5">
