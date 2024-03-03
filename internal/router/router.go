@@ -2,7 +2,10 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 
+	_ "github.com/shenmengkai/gogolook2024/docs"
 	"github.com/shenmengkai/gogolook2024/internal/middleware"
 )
 
@@ -16,6 +19,7 @@ func InitRouter() *gin.Engine {
 	r.PUT("/task/:id", mdw().UpdateTask)
 	r.DELETE("/task/:id", mdw().DeleteTask)
 
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return r
 }
 

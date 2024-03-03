@@ -13,6 +13,7 @@ start: Start docker compose
 redis: Start docker compose only Redis, before you run applicaion at local
 clean: Remove object files and cached files
 format: Format sources
+docs: Gernerate /docs
 create: curl test to create task by picking random word
 update: curl test to update task by example 'make update id=10 text=movie status=1'
 delete: curl test to delete task by example 'make delete id=10'
@@ -20,7 +21,7 @@ list: curl test to list tasks
 endef
 export HELP_TEXT
 
-.PHONY: all help release build run start redis clean format gotestsum FORCE create update list delete
+.PHONY: all help release build run start redis clean format gotestsum FORCE create update list delete swag doc
 
 all: help
 
@@ -35,7 +36,7 @@ help:
 
 release: .docker_build
 
-.docker_build: $(SOURCES) ./Dockerfile
+.docker_build: $(SOURCES) ./Dockerfile docs
 	@docker build --progress=plain -t ${PROJECT} .
 	@touch $@
 
@@ -70,6 +71,15 @@ gotestsum:
 	@command -v gotestsum >/dev/null 2>&1 || {\
 		echo >&2 "gotestsum is not installed. Installing..."; \
 		GO111MODULE=on go install gotest.tools/gotestsum@latest; \
+	}
+
+docs: swag
+	@swag init -g ./cmd/gogolook2024/main.go 
+
+swag:
+	@command -v swag >/dev/null 2>&1 || {\
+		echo >&2 "swag is not installed. Installing..."; \
+		GO111MODULE=on go install github.com/swaggo/swag/cmd/swag@v1.8.1; \
 	}
 
 list:

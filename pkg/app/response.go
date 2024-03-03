@@ -16,17 +16,11 @@ type ErrorResponse struct {
 	Data interface{} `json:"data"`
 }
 
-type OkResponse struct {
-	Result interface{} `json:"result"`
-}
-
 // Response setting gin.JSON
 func (g *Gin) Response(httpCode, errCode int, data interface{}) {
 	if errCode == e.SUCCESS {
 		if data != nil {
-			g.C.JSON(httpCode, OkResponse{
-				Result: data,
-			})
+			g.C.JSON(httpCode, data)
 		} else {
 			g.C.Status(httpCode)
 		}

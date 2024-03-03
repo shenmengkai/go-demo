@@ -33,6 +33,22 @@ func GetTaskService() task_service.TaskService {
 	return service
 }
 
+type ListTaskResponse struct {
+	Result []models.Task `json:"result"`
+}
+
+type TaskResponse struct {
+	Result models.Task `json:"result"`
+}
+
+// ListTasks godoc
+// @Summary List all tasks
+// @Description Retrieves a list of tasks.
+// @Tags Task
+// @Accept json
+// @Produce json
+// @Success 200 {object} ListTaskResponse "A list of tasks"
+// @Router /tasks [get]
 func (m *TaskMiddlewareImpl) ListTasks(c *gin.Context) {
 	appG := app.Gin{C: c}
 
@@ -42,13 +58,24 @@ func (m *TaskMiddlewareImpl) ListTasks(c *gin.Context) {
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, list)
+	appG.Response(http.StatusOK, e.SUCCESS, ListTaskResponse{
+		Result: list,
+	})
 }
 
 type CreateTaskForm struct {
 	Text string `form:"text"`
 }
 
+// CreateTask godoc
+// @Summary Create a new task
+// @Description Adds a new task with the provided text.
+// @Tags Task
+// @Accept json
+// @Produce json
+// @Param requestBody body CreateTaskForm true "Task creation request body"
+// @Success 201 {object} TaskResponse "Successfully created task with the provided text, returns task which created."
+// @Router /task [post]
 func (m *TaskMiddlewareImpl) CreateTask(c *gin.Context) {
 	var (
 		appG   = app.Gin{C: c}
@@ -73,7 +100,9 @@ func (m *TaskMiddlewareImpl) CreateTask(c *gin.Context) {
 		return
 	}
 
-	appG.Response(http.StatusCreated, e.SUCCESS, result)
+	appG.Response(http.StatusCreated, e.SUCCESS, TaskResponse{
+		Result: result,
+	})
 }
 
 type UpdateTaskForm struct {
@@ -82,6 +111,18 @@ type UpdateTaskForm struct {
 	Status *int    `form:"status"`
 }
 
+// UpdateTask godoc
+// @Summary Update a task
+// @Description Update the task with the specified ID.
+// @Tags Task
+// @Accept json
+// @Produce json
+// @Param id path int true "Task ID"
+// @Param task body UpdateTaskForm true "Fields and values to update"
+// @Success 200 {object} TaskResponse "Task updated successfully"
+// @Failure 400 {string} string "Missing ID or incorrect fields"
+// @Failure 404 {string} string "Task of ID not found"
+// @Router /task/{id} [put]
 func (m *TaskMiddlewareImpl) UpdateTask(c *gin.Context) {
 	var (
 		appG  = app.Gin{C: c}
@@ -148,9 +189,22 @@ func (m *TaskMiddlewareImpl) UpdateTask(c *gin.Context) {
 		return
 	}
 
-	appG.Response(http.StatusOK, e.SUCCESS, task)
+	appG.Response(http.StatusOK, e.SUCCESS, TaskResponse{
+		Result: task,
+	})
 }
 
+// DeleteTask godoc
+// @Summary Delete a task
+// @Description Deletes a task by its ID.
+// @Tags Task
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the task to delete"
+// @Success 200 "Task deleted successfully"
+// @Failure 400 "Missing ID"
+// @Failure 403 "Task of ID not found"
+// @Router /task/{id} [delete]
 func (m *TaskMiddlewareImpl) DeleteTask(c *gin.Context) {
 	appG := app.Gin{C: c}
 	idStr := c.Param("id")

@@ -1,0 +1,135 @@
+definitions:
+  middleware.CreateTaskForm:
+    properties:
+      text:
+        type: string
+    type: object
+  middleware.ListTaskResponse:
+    properties:
+      result:
+        items:
+          $ref: '#/definitions/models.Task'
+        type: array
+    type: object
+  middleware.TaskResponse:
+    properties:
+      result:
+        $ref: '#/definitions/models.Task'
+    type: object
+  middleware.UpdateTaskForm:
+    properties:
+      id:
+        type: integer
+      status:
+        type: integer
+      text:
+        type: string
+    type: object
+  models.Task:
+    properties:
+      id:
+        type: integer
+      status:
+        type: integer
+      text:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /task:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new task with the provided text.
+      parameters:
+      - description: Task creation request body
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/middleware.CreateTaskForm'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created task with the provided text, returns task
+            which created.
+          schema:
+            $ref: '#/definitions/middleware.TaskResponse'
+      summary: Create a new task
+      tags:
+      - Task
+  /task/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a task by its ID.
+      parameters:
+      - description: ID of the task to delete
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task deleted successfully
+        "400":
+          description: Missing ID
+        "403":
+          description: Task of ID not found
+      summary: Delete a task
+      tags:
+      - Task
+    put:
+      consumes:
+      - application/json
+      description: Update the task with the specified ID.
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Fields and values to update
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/middleware.UpdateTaskForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task updated successfully
+          schema:
+            $ref: '#/definitions/middleware.TaskResponse'
+        "400":
+          description: Missing ID or incorrect fields
+          schema:
+            type: string
+        "404":
+          description: Task of ID not found
+          schema:
+            type: string
+      summary: Update a task
+      tags:
+      - Task
+  /tasks:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of tasks.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A list of tasks
+          schema:
+            $ref: '#/definitions/middleware.ListTaskResponse'
+      summary: List all tasks
+      tags:
+      - Task
+swagger: "2.0"
