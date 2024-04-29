@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/shenmengkai/gogolook2024/internal/models"
+	"github.com/shenmengkai/go-demo/internal/models"
 )
 
 func TestTaskService_List(t *testing.T) {

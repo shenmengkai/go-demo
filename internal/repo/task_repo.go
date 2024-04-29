@@ -3,8 +3,8 @@ package task_repo
 import (
 	"encoding/json"
 
-	"github.com/shenmengkai/gogolook2024/internal/models"
-	"github.com/shenmengkai/gogolook2024/pkg/gredis"
+	"github.com/shenmengkai/go-demo/internal/models"
+	"github.com/shenmengkai/go-demo/pkg/gredis"
 )
 
 type TaskRepo interface {

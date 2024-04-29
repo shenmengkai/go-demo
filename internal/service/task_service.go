@@ -1,10 +1,10 @@
 package task_service
 
 import (
-	"github.com/shenmengkai/gogolook2024/pkg/e"
+	"github.com/shenmengkai/go-demo/pkg/e"
 
-	"github.com/shenmengkai/gogolook2024/internal/models"
-	"github.com/shenmengkai/gogolook2024/internal/repo"
+	"github.com/shenmengkai/go-demo/internal/models"
+	"github.com/shenmengkai/go-demo/internal/repo"
 )
 
 type TaskService interface {

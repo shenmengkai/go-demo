@@ -1,4 +1,4 @@
-PROJECT		:=gogolook2024
+PROJECT		:=go-demo
 MAIN_DIR	:=./cmd/$(PROJECT)
 SOURCES		:=$(shell find . -type f -name '*.go')
 PORT 		:=$(shell grep 'HttpPort' conf/app.ini | cut -d '=' -f2 | tr -d ' ')
@@ -74,7 +74,7 @@ gotestsum:
 	}
 
 docs: swag
-	@swag init -g ./cmd/gogolook2024/main.go 
+	@swag init -g $(MAIN_DIR)/main.go 
 
 swag:
 	@command -v swag >/dev/null 2>&1 || {\

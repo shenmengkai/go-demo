@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/unknwon/com"
 
-	"github.com/shenmengkai/gogolook2024/internal/models"
+	"github.com/shenmengkai/go-demo/internal/models"
 )
 
 func TestTaskMdw_ListTasks(t *testing.T) {

@@ -7,11 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/shenmengkai/gogolook2024/pkg/gredis"
-	"github.com/shenmengkai/gogolook2024/pkg/setting"
+	"github.com/shenmengkai/go-demo/pkg/gredis"
+	"github.com/shenmengkai/go-demo/pkg/setting"
 
-	"github.com/shenmengkai/gogolook2024/internal/repo"
-	"github.com/shenmengkai/gogolook2024/internal/router"
+	"github.com/shenmengkai/go-demo/internal/repo"
+	"github.com/shenmengkai/go-demo/internal/router"
 )
 
 func init() {

@@ -7,12 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
 
-	"github.com/shenmengkai/gogolook2024/pkg/app"
-	"github.com/shenmengkai/gogolook2024/pkg/e"
+	"github.com/shenmengkai/go-demo/pkg/app"
+	"github.com/shenmengkai/go-demo/pkg/e"
 
-	"github.com/shenmengkai/gogolook2024/internal/models"
-	"github.com/shenmengkai/gogolook2024/internal/repo"
-	"github.com/shenmengkai/gogolook2024/internal/service"
+	"github.com/shenmengkai/go-demo/internal/models"
+	task_repo "github.com/shenmengkai/go-demo/internal/repo"
+	task_service "github.com/shenmengkai/go-demo/internal/service"
 )
 
 type TaskMiddleware interface {

@@ -1,4 +1,4 @@
-module github.com/shenmengkai/gogolook2024
+module github.com/shenmengkai/go-demo
 
 go 1.13
 
